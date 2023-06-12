@@ -1,0 +1,450 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Making our boid some friends - boid_tutorial</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1-Introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="2-ECS.html"><strong aria-hidden="true">2.</strong> What is ECS?</a></li><li class="chapter-item expanded "><a href="3-create-world.html"><strong aria-hidden="true">3.</strong> Creating a world</a></li><li class="chapter-item expanded "><a href="4-creating_a_boid.html"><strong aria-hidden="true">4.</strong> Creating a boid</a></li><li class="chapter-item expanded "><a href="5-creating-movement.html"><strong aria-hidden="true">5.</strong> Creating Movement</a></li><li class="chapter-item expanded "><a href="6-making-our-boid-some-friends.html" class="active"><strong aria-hidden="true">6.</strong> Making our boid some friends</a></li><li class="chapter-item expanded "><a href="7-alignment.html"><strong aria-hidden="true">7.</strong> Alignment</a></li><li class="chapter-item expanded "><a href="8-cohesion.html"><strong aria-hidden="true">8.</strong> Cohesion</a></li><li class="chapter-item expanded "><a href="9-seperation.html"><strong aria-hidden="true">9.</strong> Seperation</a></li><li class="chapter-item expanded "><a href="z-bibliography.html"><strong aria-hidden="true">10.</strong> bibliography</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">boid_tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="making-our-boid-some-friends"><a class="header" href="#making-our-boid-some-friends">Making our boid some friends</a></h1>
+<p>a boid isn't a boid if its all by itself! in this part we will spawn many boids around randomly.</p>
+<p>first we oughta make the boid smaller:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>...
+fn spawn_boids_system(...
+...
+        ColorMesh2dBundle {
+            material: materials.add(ColorMaterial::from(Color::PURPLE)), 
+            mesh: meshes.add(create_triagle_mesh()).into(),
+            transform: Transform {
+                scale: Vec3::splat(10.0),
+                ..default()
+            },
+            ..default()
+        },
+...
+<span class="boring">}</span></code></pre></pre>
+<p>we change the scale from <code>Vec3::splat(100.0)</code> to <code>Vec3::splat(100.0)</code>.
+the &quot;splat&quot; constructor creates a Vector with the same length on each side. so <code>Vec3::splat(3.0)</code> returns <code>Vec3 {x: 3.0, y:3.0, z:3.0}</code>.</p>
+<p>we are going to need the rand crate so we will use it on the top:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bevy::prelude::*;
+use bevy::render::{render_resource::PrimitiveTopology, mesh::Indices};
+use rand::Rng;
+...
+<span class="boring">}</span></code></pre></pre>
+<p>we wrap everything in a for loop to repeat 50 times.
+we query the window, and get its dimensions.
+we change the transform of every boid to a random spot within the window dimensions:</p>
+<pre><pre class="playground"><code class="language-rust #1"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn spawn_boids_system(
+    mut commands: Commands,
+    mut meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;,
+    mut materials: ResMut&lt;Assets&lt;ColorMaterial&gt;&gt;,
+    window_query: Query&lt;&amp;Window&gt;,
+){
+    let mut random_thread = rand::thread_rng();
+    let window = window_query.get_single().unwrap();
+    for _ in 0..=50 {
+        commands.spawn((
+            ColorMesh2dBundle {
+                material: materials.add(ColorMaterial::from(Color::PURPLE)), 
+                mesh: meshes.add(create_triagle_mesh()).into(),
+                transform: Transform {
+                    scale: Vec3::splat(10.0),
+                    translation: Vec3 {
+                        x: random_thread.gen_range(-window.width()..window.width()),
+                        y: random_thread.gen_range(-window.height()..window.height()),
+                        z: 0.0,
+                    },
+                    ..default()
+                },
+                ..default()
+            },
+            Velocity(Vec3{x: -10.0, y: -10.0, z: 0.0})
+        ));
+    }
+}
+
+<span class="boring">}</span></code></pre></pre>
+<p>when we call rand::thread_rng() we are creating a new random number generator. for performance reasons we should only make one. every number afterword takes the last output as input.</p>
+<p>after we have the generator, we use the .gen_range(a..b) function to pick a random number between a and b.</p>
+<p>lets make the Velocity random as well:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>...
+            Velocity(Vec3{
+                x: random_thread.gen_range(-1.0..1.0),
+                y: random_thread.gen_range(-1.0..1.0),
+                z: 0.0,
+            }.normalize() * Vec3::splat(10.0))
+...
+<span class="boring">}</span></code></pre></pre>
+<p>this picks a <strong>random</strong> point in a cube, 
+<strong>normalizes</strong> it so the boid all move at the same speed,
+then we <strong>multiply</strong> our random unit vector by 10 using splat(). 10 is the <strong>speed</strong> for our boids.</p>
+<p>Right now all out boids slowly drift off to space and never come back. I want to make a boid that disappears off the left side of the screen reappear on the right. And the same for all sides. </p>
+<p>we will start with another system:</p>
+<pre><pre class="playground"><code class="language-rust">...
+fn main() {
+    App::new()
+    .add_plugins(DefaultPlugins)
+    .add_startup_system(setup_camera)
+    .add_startup_system(spawn_boids_system)
+    .add_system(movement_system)
+    .add_system(wrap_around_system)
+    .run();
+}
+...</code></pre></pre>
+<p>every frame we check if the current boid has flew further left then the left side of the screen, then move it to the opposite side:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn wrap_around_system(
+    window_query: Query&lt;&amp;Window&gt;,
+    mut query: Query&lt;&amp;mut Transform&gt;
+) {
+    let window_entity = window_query.get_single().unwrap();
+    let width = window_entity.width();
+    let height = window_entity.height();
+    for mut boid in query.iter_mut() {
+        if boid.translation.x &lt; -width / 2.0 {
+            boid.translation.x = width / 2.0
+        };
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>and then repeat for other 3 walls:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn wrap_around_system(
+    window_query: Query&lt;&amp;Window&gt;,
+    mut query: Query&lt;&amp;mut Transform&gt;
+) {
+    let window_entity = window_query.get_single().unwrap();
+    let width = window_entity.width();
+    let height = window_entity.height();
+    for mut boid in query.iter_mut() {
+        if boid.translation.x &lt; -width / 2.0 {
+            boid.translation.x = width / 2.0
+        };
+        if boid.translation.x &gt; width / 2.0 {
+            boid.translation.x = -width / 2.0
+        };
+        if boid.translation.y &lt; -height / 2.0 {
+            boid.translation.y = height / 2.0
+        };
+        if boid.translation.y &gt; height / 2.0 {
+            boid.translation.y = -height / 2.0
+        };
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<hr />
+<p>here is our program so far:</p>
+<pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
+use bevy::render::{render_resource::PrimitiveTopology, mesh::Indices};
+use rand::Rng;
+
+fn main() {
+    App::new()
+    .add_plugins(DefaultPlugins)
+    .add_startup_system(setup_camera)
+    .add_startup_system(spawn_boids_system)
+    .add_system(movement_system)
+    .add_system(wrap_around_system)
+    .run();
+}
+fn setup_camera(
+    mut commands: Commands
+) {
+    commands.spawn(Camera2dBundle::default());
+}
+
+fn create_triagle_mesh() -&gt; Mesh {
+    let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+        [0.0, 2.0, 0.0],
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+    ]);
+    mesh.set_indices(Some(Indices::U32(vec![0,1,2])));
+    mesh
+}
+
+#[derive(Component)]
+struct Velocity(Vec3);
+
+fn spawn_boids_system(
+    mut commands: Commands,
+    mut meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;,
+    mut materials: ResMut&lt;Assets&lt;ColorMaterial&gt;&gt;,
+    window_query: Query&lt;&amp;Window&gt;,
+){
+    let mut random_thread = rand::thread_rng();
+    let window = window_query.get_single().unwrap();
+    for _ in 0..=50 {
+        commands.spawn((
+            ColorMesh2dBundle {
+                material: materials.add(ColorMaterial::from(Color::PURPLE)), 
+                mesh: meshes.add(create_triagle_mesh()).into(),
+                transform: Transform {
+                    scale: Vec3::splat(10.0),
+                    translation: Vec3 {
+                        x: random_thread.gen_range(-window.width()..window.width()),
+                        y: random_thread.gen_range(-window.height()..window.height()),
+                        z: 0.0,
+                    },
+                    ..default()
+                },
+                ..default()
+            },
+            Velocity(Vec3{
+                x: random_thread.gen_range(-1.0..1.0),
+                y: random_thread.gen_range(-1.0..1.0),
+                z: 0.0,
+            }.normalize() * Vec3::splat(10.0))
+        ));
+    }
+}
+
+fn movement_system(
+    time: Res&lt;Time&gt;,
+    mut query: Query&lt;(&amp;mut Transform, &amp;Velocity)&gt;
+) {
+    for (mut transform, velocity) in query.iter_mut() {
+        transform.translation += velocity.0 * time.delta_seconds();
+        transform.rotation = Quat::from_rotation_z((-velocity.0.x).atan2(velocity.0.y));
+    }
+}
+
+fn wrap_around_system(
+    window_query: Query&lt;&amp;Window&gt;,
+    mut query: Query&lt;&amp;mut Transform&gt;
+) {
+    let window_entity = window_query.get_single().unwrap();
+    let width = window_entity.width();
+    let height = window_entity.height();
+    for mut boid in query.iter_mut() {
+        if boid.translation.x &lt; -width / 2.0 {
+            boid.translation.x = width / 2.0
+        };
+        if boid.translation.x &gt; width / 2.0 {
+            boid.translation.x = -width / 2.0
+        };
+        if boid.translation.y &lt; -height / 2.0 {
+            boid.translation.y = height / 2.0
+        };
+        if boid.translation.y &gt; height / 2.0 {
+            boid.translation.y = -height / 2.0
+        };
+    }
+}</code></pre></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="5-creating-movement.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="7-alignment.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="5-creating-movement.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="7-alignment.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
