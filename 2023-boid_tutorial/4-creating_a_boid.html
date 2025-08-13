@@ -1,0 +1,415 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Creating a boid - boid_tutorial</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1-Introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="2-ECS.html"><strong aria-hidden="true">2.</strong> What is ECS?</a></li><li class="chapter-item expanded "><a href="3-create-world.html"><strong aria-hidden="true">3.</strong> Creating a world</a></li><li class="chapter-item expanded "><a href="4-creating_a_boid.html" class="active"><strong aria-hidden="true">4.</strong> Creating a boid</a></li><li class="chapter-item expanded "><a href="5-creating-movement.html"><strong aria-hidden="true">5.</strong> Creating Movement</a></li><li class="chapter-item expanded "><a href="6-making-our-boid-some-friends.html"><strong aria-hidden="true">6.</strong> Making our boid some friends</a></li><li class="chapter-item expanded "><a href="7-alignment.html"><strong aria-hidden="true">7.</strong> Alignment</a></li><li class="chapter-item expanded "><a href="8-cohesion.html"><strong aria-hidden="true">8.</strong> Cohesion</a></li><li class="chapter-item expanded "><a href="9-seperation.html"><strong aria-hidden="true">9.</strong> Seperation</a></li><li class="chapter-item expanded "><a href="z-bibliography.html"><strong aria-hidden="true">10.</strong> bibliography</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">boid_tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="creating-a-boid"><a class="header" href="#creating-a-boid">Creating a boid</a></h1>
+<p>our next step is to draw the boid on the screen. </p>
+<p>our first step is drawing anything on the screen. our new &quot;spawn_boids_system&quot; with spawn an entity using a &quot;ColorMesh2dBundle&quot;.</p>
+<p>A bundle is nothing but a collection of components commonly used together. You can even build you own bundles (we wont be doing that). This bundle has all the components we need to get a shape on the screen. </p>
+<pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
+
+fn main() {
+    App::new()
+    .add_plugins(DefaultPlugins)
+    .add_startup_system(setup_camera)
+    .add_startup_system(spawn_boids_system)
+    .run();
+}
+fn setup_camera(
+    mut commands: Commands
+) {
+    commands.spawn(Camera2dBundle::default());
+}
+
+fn spawn_boids_system(
+    mut commands: Commands,
+    mut meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;,
+    mut materials: ResMut&lt;Assets&lt;ColorMaterial&gt;&gt;,
+){
+    commands.spawn(
+        ColorMesh2dBundle {
+            material: materials.add(ColorMaterial::from(Color::PURPLE)), 
+            mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
+            transform: Transform {
+                scale: Vec3::splat(100.0),
+                ..default()
+            },
+            ..default()
+        },
+    );
+}</code></pre></pre>
+<p>for bevy to draw on the screen it needs to know:</p>
+<ul>
+<li>the <strong>material</strong>: what color to draw</li>
+<li>what <strong>mesh</strong> to use: what shape to draw</li>
+<li>and the <strong>transform</strong>: where to draw and in what rotation/scale.
+&quot;ColorMesh2dBundle&quot; has other properties that we do not care about. we can use <code>..default</code> to fill in the default values for the remaining feilds.</li>
+</ul>
+<p>after running this with </p>
+<pre><code class="language-sh">cargo run
+</code></pre>
+<p>you should see a purple square show up on screen. </p>
+<p>we build the square using <code>Mesh::from(shape::Quad::default())</code>. sadly, there is no shape for isosceles triangle that i am aware of so we will have to build our own. It is a good idea to build out mesh is a separate function:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>...
+
+fn create_triagle_mesh() -&gt; Mesh {
+	//build mesh
+}
+
+fn spawn_boids_system(
+    mut commands: Commands,
+    mut meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;,
+    mut materials: ResMut&lt;Assets&lt;ColorMaterial&gt;&gt;,
+){
+    commands.spawn(
+        ColorMesh2dBundle {
+            material: materials.add(ColorMaterial::from(Color::PURPLE)), 
+            mesh: meshes.add(create_triagle_mesh()).into(),
+            transform: Transform {
+                scale: Vec3::splat(100.0),
+                ..default()
+            },
+            ..default()
+        },
+    );
+}
+<span class="boring">}</span></code></pre></pre>
+<p>^we changed the code inside meshes.add(**)</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>...
+
+fn create_triagle_mesh() -&gt; Mesh {
+    let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+    ]);
+    mesh.set_indices(Some(Indices::U32(vec![0,1,2])));
+    mesh
+}
+
+...
+<span class="boring">}</span></code></pre></pre>
+<p>in order to do this we need to import a few things from bevy at the top of our program:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bevy::prelude::*;
+use bevy::render::{render_resource::PrimitiveTopology, mesh::Indices};
+...
+<span class="boring">}</span></code></pre></pre>
+<p>I left the coords for the mesh above as 0's. we will fill them in now
+<img src="images/mesh_drawing.png" alt="mesh_drawing" /></p>
+<p>as you can see we have vertices at [0,2], [-1, -1], and [1, -1].
+although we are working in 2d, all meshes in bevy are 3d. In this case all our z coords(toward and away from camera ) will be left as 0. </p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>...
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+        [0.0, 2.0, 0.0],
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+    ]);
+...
+<span class="boring">}</span></code></pre></pre>
+<p>the reason that we need to add a decimal of 0 is to tell the compiler that these are floating point numbers and not integers. Bevy always uses f32.</p>
+<p>the last component we need to complete our boid is a velocity vector. we will define a new component like this:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>...
+#[derive(Component)]
+struct Velocity(Vec3);
+...
+<span class="boring">}</span></code></pre></pre>
+<p>while we only need a Vec2 for because we are only using 2 dimensions, using a Vec3 will allow us to do easier arithmetic with the translation of boids (which have to use Vec3).</p>
+<p>then when we spawn the boid we need to add the velocity component:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>...
+#[derive(Component)]
+struct Velocity(Vec3);
+
+fn spawn_boids_system(
+    mut commands: Commands,
+    mut meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;,
+    mut materials: ResMut&lt;Assets&lt;ColorMaterial&gt;&gt;,
+){
+    commands.spawn((
+        ColorMesh2dBundle {
+            material: materials.add(ColorMaterial::from(Color::PURPLE)), 
+            mesh: meshes.add(create_triagle_mesh()).into(),
+            transform: Transform {
+                scale: Vec3::splat(100.0),
+                ..default()
+            },
+            ..default()
+        },
+        Velocity(Vec3{x: 0.0, y: 10.0, z: 0.0})
+    ));
+}
+<span class="boring">}</span></code></pre></pre>
+<p>^the &quot;spawn&quot; command only take one argument so we need to wrap our 'ColorMesh2dBundle' and 'Velocity' in a new set of parenthesis: <code>commands.spawn((...))</code></p>
+<p>our boids now has no velocity in the x direction, and 10.0 in the y. Once we add movement, it should move up by 10 units per frame.</p>
+<hr />
+<p>here is our program so far:</p>
+<pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
+use bevy::render::{render_resource::PrimitiveTopology, mesh::Indices};
+
+fn main() {
+    App::new()
+    .add_plugins(DefaultPlugins)
+    .add_startup_system(setup_camera)
+    .add_startup_system(spawn_boids_system)
+    .run();
+}
+fn setup_camera(
+    mut commands: Commands
+) {
+    commands.spawn(Camera2dBundle::default());
+}
+
+fn create_triagle_mesh() -&gt; Mesh {
+    let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vec![
+        [0.0, 2.0, 0.0],
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+    ]);
+    mesh.set_indices(Some(Indices::U32(vec![0,1,2])));
+    mesh
+}
+
+#[derive(Component)]
+struct Velocity(Vec3);
+
+fn spawn_boids_system(
+    mut commands: Commands,
+    mut meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;,
+    mut materials: ResMut&lt;Assets&lt;ColorMaterial&gt;&gt;,
+){
+    commands.spawn((
+        ColorMesh2dBundle {
+            material: materials.add(ColorMaterial::from(Color::PURPLE)), 
+            mesh: meshes.add(create_triagle_mesh()).into(),
+            transform: Transform {
+                scale: Vec3::splat(100.0),
+                ..default()
+            },
+            ..default()
+        },
+        Velocity(Vec3{x: 0.0, y: 10.0, z: 0.0})
+    ));
+}</code></pre></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="3-create-world.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="5-creating-movement.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="3-create-world.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="5-creating-movement.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
